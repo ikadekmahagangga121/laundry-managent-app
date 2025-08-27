@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "nodemon src/app.js",
     "start": "node src/app.js",
+    "bundle:frontend": "node scripts/bundle-frontend.js",
+    "build": "npm run bundle:frontend",
     "lint": "echo 'no lint configured'"
   },
   "dependencies": {

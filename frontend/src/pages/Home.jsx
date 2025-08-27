@@ -23,7 +23,7 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {laundries.map(l => (
           <div key={l.id} className="bg-white rounded-lg p-4 shadow-sm border">
-            {l.foto && <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${l.foto}`} className="h-40 w-full object-cover rounded" />}
+            {l.foto && <img src={`${import.meta.env.VITE_API_URL || ''}${l.foto}`} className="h-40 w-full object-cover rounded" />}
             <div className="mt-2">
               <div className="font-semibold">{l.nama_laundry}</div>
               <div className="text-sm text-gray-600">{l.alamat}</div>
