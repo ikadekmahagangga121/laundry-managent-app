@@ -13,14 +13,14 @@ export default function OwnerDashboard() {
   useEffect(() => { setAuthToken(token) }, [token])
 
   useEffect(() => {
-    api.get('/laundries').then(({ data }) => {
-      const mine = data.find(d => d.id === parseJwt(token)?.id)
-      if (mine) {
-        setProfile(mine)
-        setNamaLaundry(mine.nama_laundry)
-        setAlamat(mine.alamat)
-      }
-    })
+    const me = parseJwt(token)
+    if (me?.id) {
+      api.get(`/laundries/${me.id}`).then(({ data }) => {
+        setProfile(data)
+        setNamaLaundry(data.nama_laundry)
+        setAlamat(data.alamat)
+      }).catch(()=>{})
+    }
     api.get('/orders/incoming').then(r => setIncoming(r.data))
   }, [token])
 
@@ -52,7 +52,7 @@ export default function OwnerDashboard() {
           <input className="w-full border rounded p-2" value={alamat} onChange={e=>setAlamat(e.target.value)} />
           <button className="bg-blue-600 text-white rounded px-4 py-2" onClick={saveProfile}>Simpan</button>
           <div className="pt-3">
-            {profile?.foto && <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${profile.foto}`} className="h-32 rounded mb-2" />}
+            {profile?.foto && <img src={`${import.meta.env.VITE_API_URL || ''}${profile.foto}`} className="h-32 rounded mb-2" />}
             <input type="file" onChange={e=>setFile(e.target.files?.[0] || null)} className="w-full border rounded p-2" />
             <button className="mt-2 border rounded px-4 py-2" onClick={uploadFoto} disabled={!file}>Upload Foto</button>
           </div>

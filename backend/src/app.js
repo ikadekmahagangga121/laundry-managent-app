@@ -24,6 +24,8 @@ if (process.env.FORCE_HTTPS === 'true') {
   });
 }
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
+// Serve built frontend static files
+app.use(express.static(path.resolve(__dirname, '../public')));
 
 app.get('/', (req, res) => {
   res.json({ ok: true, name: 'Laundry Management API' });
@@ -32,6 +34,21 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/laundries', laundryRoutes);
 app.use('/orders', orderRoutes);
+
+// SPA fallback for client-side routes
+app.get('*', (req, res, next) => {
+  if (req.method !== 'GET') return next();
+  if (
+    req.path.startsWith('/auth') ||
+    req.path.startsWith('/laundries') ||
+    req.path.startsWith('/orders') ||
+    req.path.startsWith('/uploads')
+  ) {
+    return next();
+  }
+  const indexPath = path.resolve(__dirname, '../public/index.html');
+  return res.sendFile(indexPath);
+});
 
 const PORT = process.env.PORT || 3000;
 

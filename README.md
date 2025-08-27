@@ -24,22 +24,35 @@ Frontend: salin `frontend/.env.example` menjadi `frontend/.env` (opsional jika A
 VITE_API_URL=http://localhost:3000
 ```
 
-### Menjalankan Proyek
-1) Backend
+### Menjalankan Proyek (Single Server)
+Backend akan sekaligus melayani Frontend (static build) pada port 3000.
+
+1) Build Frontend ke Backend
 ```
 cd backend
 npm install
-npm run dev
+npm run build
 ```
-API akan tersedia di `http://localhost:3000`.
 
-2) Frontend
+2) Jalankan Backend
 ```
-cd frontend
-npm install
+cd backend
 npm run dev
 ```
-App akan tersedia di `http://localhost:5173`.
+App akan tersedia di `http://localhost:3000`.
+
+### Mode Dev Terpisah (opsional)
+Jika ingin hot reload Frontend:
+```
+# Terminal 1
+cd backend && npm run dev
+# Terminal 2
+cd frontend && npm install && npm run dev
+```
+Set `frontend/.env`:
+```
+VITE_API_URL=http://localhost:3000
+```
 
 ### Fitur Utama
 - Auth: Register Owner/Customer dan Login (JWT)
