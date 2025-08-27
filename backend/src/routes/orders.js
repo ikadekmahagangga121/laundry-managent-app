@@ -52,6 +52,16 @@ router.post(
     const { owner_id, catatan } = req.body;
     const pool = getPool();
     try {
+      // enforce plan gates: free -> max 3 active orders, pro -> 30, professional -> unlimited
+      const ownerPlanRes = await pool.query('SELECT plan FROM owners WHERE id=$1', [owner_id]);
+      if (ownerPlanRes.rowCount === 0) return res.status(404).json({ message: 'Owner not found' });
+      const plan = ownerPlanRes.rows[0].plan || 'free';
+      const activeRes = await pool.query("SELECT COUNT(*)::int AS count FROM orders WHERE owner_id=$1 AND status IN ('pending','accepted','processing')", [owner_id]);
+      const active = activeRes.rows[0].count;
+      const limitMap = { free: 3, pro: 30 };
+      if (limitMap[plan] && active >= limitMap[plan]) {
+        return res.status(403).json({ message: 'Owner saat ini mencapai batas order untuk plan' });
+      }
       const id = uuidv4();
       const result = await pool.query(
         'INSERT INTO orders (id, customer_id, owner_id, status, catatan) VALUES ($1,$2,$3,$4,$5) RETURNING *',

@@ -8,6 +8,7 @@ const { initDb } = require('./db');
 const authRoutes = require('./routes/auth');
 const laundryRoutes = require('./routes/laundries');
 const orderRoutes = require('./routes/orders');
+const billingRoutes = require('./routes/billing');
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/laundries', laundryRoutes);
 app.use('/orders', orderRoutes);
+app.use('/billing', billingRoutes);
 
 // SPA fallback for client-side routes
 app.get('*', (req, res, next) => {

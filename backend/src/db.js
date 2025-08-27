@@ -26,7 +26,10 @@ async function initDb() {
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         foto TEXT,
-        rating NUMERIC(3,2) DEFAULT 0
+        rating NUMERIC(3,2) DEFAULT 0,
+        plan VARCHAR(32) NOT NULL DEFAULT 'free',
+        plan_expiry TIMESTAMP WITH TIME ZONE,
+        wallet_balance NUMERIC(12,2) NOT NULL DEFAULT 0
       );
     `);
     await client.query(`
@@ -48,6 +51,17 @@ async function initDb() {
         catatan TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS topups (
+        id UUID PRIMARY KEY,
+        owner_id UUID REFERENCES owners(id) ON DELETE CASCADE,
+        amount NUMERIC(12,2) NOT NULL,
+        method VARCHAR(32) NOT NULL,
+        status VARCHAR(32) NOT NULL DEFAULT 'pending',
+        reference VARCHAR(128) UNIQUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
     await client.query(`
