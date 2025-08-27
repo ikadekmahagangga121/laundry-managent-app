@@ -13,14 +13,14 @@ export default function OwnerDashboard() {
   useEffect(() => { setAuthToken(token) }, [token])
 
   useEffect(() => {
-    api.get('/laundries').then(({ data }) => {
-      const mine = data.find(d => d.id === parseJwt(token)?.id)
-      if (mine) {
-        setProfile(mine)
-        setNamaLaundry(mine.nama_laundry)
-        setAlamat(mine.alamat)
-      }
-    })
+    const me = parseJwt(token)
+    if (me?.id) {
+      api.get(`/laundries/${me.id}`).then(({ data }) => {
+        setProfile(data)
+        setNamaLaundry(data.nama_laundry)
+        setAlamat(data.alamat)
+      }).catch(()=>{})
+    }
     api.get('/orders/incoming').then(r => setIncoming(r.data))
   }, [token])
 

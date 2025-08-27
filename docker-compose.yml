@@ -18,8 +18,10 @@ services:
     container_name: laundry-frontend
     ports:
       - "5173:80"
-    environment:
-      - VITE_API_URL=http://localhost:3000
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:3000
     depends_on:
       - backend
 
