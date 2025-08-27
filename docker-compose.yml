@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  backend:
+    build: ./backend
+    container_name: laundry-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - PGSSL=${PGSSL:-false}
+      - JWT_SECRET=${JWT_SECRET}
+      - FORCE_HTTPS=${FORCE_HTTPS:-false}
+    volumes:
+      - ./backend/uploads:/app/uploads
+  frontend:
+    build: ./frontend
+    container_name: laundry-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+
