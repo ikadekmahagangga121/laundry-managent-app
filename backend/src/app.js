@@ -14,6 +14,15 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan('dev'));
+// Optional HTTPS redirect for production
+if (process.env.FORCE_HTTPS === 'true') {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect('https://' + req.headers.host + req.url);
+    }
+    next();
+  });
+}
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 
 app.get('/', (req, res) => {

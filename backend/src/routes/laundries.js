@@ -26,9 +26,17 @@ const upload = multer({ storage });
 
 router.get('/', async (req, res) => {
   const pool = getPool();
+  const page = Math.max(parseInt(req.query.page || '1', 10), 1)
+  const limit = Math.min(Math.max(parseInt(req.query.limit || '12', 10), 1), 50)
+  const offset = (page - 1) * limit
   try {
-    const result = await pool.query('SELECT id, nama_laundry, alamat, foto, rating FROM owners ORDER BY nama_laundry ASC');
-    return res.json(result.rows);
+    const totalRes = await pool.query('SELECT COUNT(*)::int AS count FROM owners')
+    const result = await pool.query(
+      'SELECT id, nama_laundry, alamat, foto, rating FROM owners ORDER BY nama_laundry ASC LIMIT $1 OFFSET $2',
+      [limit, offset]
+    );
+    const total = totalRes.rows[0].count
+    return res.json({ data: result.rows, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'Internal error' });

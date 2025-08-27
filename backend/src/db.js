@@ -50,6 +50,17 @@ async function initDb() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS owner_ratings (
+        id UUID PRIMARY KEY,
+        order_id UUID UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+        owner_id UUID REFERENCES owners(id) ON DELETE CASCADE,
+        customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
+        rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK');

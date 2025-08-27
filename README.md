@@ -44,10 +44,20 @@ App akan tersedia di `http://localhost:5173`.
 ### Fitur Utama
 - Auth: Register Owner/Customer dan Login (JWT)
 - Laundry (owner): kelola profil (nama, alamat, foto upload), hapus
-- Daftar laundry publik (foto, alamat, rating)
+- Daftar laundry publik (foto, alamat, rating) + pagination
 - Orders: Customer membuat order ke Owner; Owner kelola status
+- Ratings: Customer memberi rating (1-5) pada order yang sudah selesai; rata-rata rating otomatis
 
 ### Catatan
 - Folder upload disajikan dari `backend/uploads` dan diakses via `/uploads/<filename>`
 - Pastikan `DATABASE_URL` valid (Koyeb butuh `PGSSL=true`).
+
+### Docker (opsional)
+Siapkan environment pada host (variabel diekspor atau `.env` di root yang memuat DATABASE_URL, JWT_SECRET, dll), lalu jalankan:
+```
+docker compose up --build
+```
+- Backend akan berjalan di `http://localhost:3000`
+- Frontend akan berjalan di `http://localhost:5173`
+
 

@@ -6,6 +6,42 @@ const { authRequired } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Customer can rate completed order once
+router.post(
+  '/:id/rating',
+  authRequired(['customer']),
+  [body('rating').isInt({ min: 1, max: 5 }), body('comment').optional().isString()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+    const pool = getPool();
+    try {
+      const orderRes = await pool.query('SELECT * FROM orders WHERE id=$1 AND customer_id=$2', [id, req.user.id]);
+      if (orderRes.rowCount === 0) return res.status(404).json({ message: 'Order not found' });
+      const order = orderRes.rows[0];
+      if (order.status !== 'completed') return res.status(400).json({ message: 'Order not completed' });
+      // upsert rating (unique by order_id)
+      const { v4: uuidv4 } = require('uuid');
+      const ratingId = uuidv4();
+      await pool.query(
+        `INSERT INTO owner_ratings (id, order_id, owner_id, customer_id, rating, comment)
+         VALUES ($1,$2,$3,$4,$5,$6)
+         ON CONFLICT (order_id) DO UPDATE SET rating=EXCLUDED.rating, comment=EXCLUDED.comment` ,
+        [ratingId, order.id, order.owner_id, order.customer_id, rating, comment || null]
+      );
+      // update owner's average rating
+      const avgRes = await pool.query('SELECT COALESCE(AVG(rating),0)::numeric(3,2) as avg FROM owner_ratings WHERE owner_id=$1', [order.owner_id]);
+      await pool.query('UPDATE owners SET rating=$1 WHERE id=$2', [avgRes.rows[0].avg, order.owner_id]);
+      return res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({ message: 'Internal error' });
+    }
+  }
+);
+
 router.post(
   '/',
   authRequired(['customer']),

@@ -8,6 +8,7 @@ export default function CustomerDashboard() {
   const [orders, setOrders] = useState([])
   const [ownerId, setOwnerId] = useState('')
   const [catatan, setCatatan] = useState('')
+  const [ratingMap, setRatingMap] = useState({})
 
   useEffect(() => { setAuthToken(token) }, [token])
 
@@ -20,6 +21,16 @@ export default function CustomerDashboard() {
     const { data } = await api.post('/orders', { owner_id: ownerId, catatan })
     setOrders(prev => [data, ...prev])
     setOwnerId(''); setCatatan('')
+  }
+
+  const submitRating = async (orderId) => {
+    const rating = Number(ratingMap[orderId]?.rating || 0)
+    const comment = ratingMap[orderId]?.comment || ''
+    if (!rating) return
+    await api.post(`/orders/${orderId}/rating`, { rating, comment })
+    // refresh list
+    const { data } = await api.get('/orders/me')
+    setOrders(data)
   }
 
   return (
@@ -42,6 +53,16 @@ export default function CustomerDashboard() {
               <div className="text-sm">Laundry: {o.nama_laundry}</div>
               <div className="text-sm">Status: {o.status}</div>
               <div className="text-xs text-gray-500">{new Date(o.created_at).toLocaleString()}</div>
+              {o.status === 'completed' && (
+                <div className="mt-2 flex items-center gap-2">
+                  <select className="border rounded p-1 text-sm" value={ratingMap[o.id]?.rating || ''} onChange={e=>setRatingMap(prev=>({ ...prev, [o.id]: { ...prev[o.id], rating: e.target.value } }))}>
+                    <option value="">Rate</option>
+                    {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                  <input className="border rounded p-1 text-sm" placeholder="Komentar" value={ratingMap[o.id]?.comment || ''} onChange={e=>setRatingMap(prev=>({ ...prev, [o.id]: { ...prev[o.id], comment: e.target.value } }))} />
+                  <button className="px-3 py-1 border rounded text-sm" onClick={()=>submitRating(o.id)} disabled={!ratingMap[o.id]?.rating}>Kirim</button>
+                </div>
+              )}
             </div>
           ))}
         </div>
